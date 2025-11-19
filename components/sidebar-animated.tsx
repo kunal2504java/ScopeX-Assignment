@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
@@ -13,8 +12,13 @@ import {
   UsersRound,
 } from "lucide-react"
 import type { Role } from "@/types"
+import {
+  Sidebar,
+  SidebarBody,
+  SidebarLink,
+} from "@/components/animated-sidebar"
 
-interface SidebarProps {
+interface SidebarAnimatedProps {
   role: Role
 }
 
@@ -86,35 +90,53 @@ const navItems: NavItem[] = [
   },
 ]
 
-export function Sidebar({ role }: SidebarProps) {
+export function SidebarAnimated({ role }: SidebarAnimatedProps) {
   const pathname = usePathname()
-
   const filteredNavItems = navItems.filter((item) => item.roles.includes(role))
 
+  const links = filteredNavItems.map((item) => {
+    const Icon = item.icon
+    const isActive = pathname === item.href
+    
+    return {
+      label: item.title,
+      href: item.href,
+      icon: (
+        <Icon
+          className={cn(
+            "h-5 w-5 flex-shrink-0",
+            isActive
+              ? "text-blue-600 dark:text-blue-400"
+              : "text-slate-700 dark:text-slate-300"
+          )}
+        />
+      ),
+    }
+  })
+
   return (
-    <aside className="w-64 border-r border-slate-200 bg-white dark:bg-zinc-950 dark:border-zinc-800 min-h-[calc(100vh-4rem)]">
-      <nav className="flex flex-col gap-1 p-4">
-        {filteredNavItems.map((item) => {
-          const Icon = item.icon
-          const isActive = pathname === item.href
-          
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
-                  : "text-slate-700 hover:bg-slate-100 dark:text-gray-300 dark:hover:bg-zinc-800"
-              )}
-            >
-              <Icon className="h-5 w-5" />
-              {item.title}
-            </Link>
-          )
-        })}
-      </nav>
-    </aside>
+    <Sidebar>
+      <SidebarBody className="justify-between gap-10">
+        <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="mt-8 flex flex-col gap-2">
+            {links.map((link, idx) => {
+              const isActive = pathname === link.href
+              return (
+                <SidebarLink
+                  key={idx}
+                  link={link}
+                  className={cn(
+                    "rounded-lg px-3 py-2 transition-colors",
+                    isActive
+                      ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                      : "hover:bg-slate-100 dark:hover:bg-zinc-800"
+                  )}
+                />
+              )
+            })}
+          </div>
+        </div>
+      </SidebarBody>
+    </Sidebar>
   )
 }
